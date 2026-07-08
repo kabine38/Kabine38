@@ -16,7 +16,10 @@ CREATE TABLE categories (
 INSERT INTO categories (name, slug) VALUES
 ('Top News','top-news'),
 ('Herren','herren'),
-('Jugend','jugend');
+('Damen','damen'),
+('Jugend','jugend'),
+('Transfers','transfers'),
+('Interviews','interviews');
 
 CREATE TABLE news (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -29,6 +32,16 @@ CREATE TABLE news (
     show_slider TINYINT(1) DEFAULT 0,
     is_pinned TINYINT(1) DEFAULT 0,
     status ENUM('draft','published') DEFAULT 'draft',
+
+    type ENUM(
+'news',
+'interview',
+'gallery',
+'magazine'
+) DEFAULT 'news',
+
+    archive_at DATETIME NULL,
+
     published_at DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -44,9 +57,27 @@ CREATE TABLE news_categories (
 );
 
 CREATE TABLE news_images (
+
     id INT AUTO_INCREMENT PRIMARY KEY,
-    news_id INT,
-    image VARCHAR(255),
+
+    news_id INT NOT NULL,
+
+    image VARCHAR(255) NOT NULL,
+
+    caption VARCHAR(255),
+
+    photographer VARCHAR(255),
+
+    is_hero TINYINT(1) DEFAULT 0,
+
+    crop LONGTEXT,
+
     sort_order INT DEFAULT 0,
-    FOREIGN KEY(news_id) REFERENCES news(id) ON DELETE CASCADE
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY(news_id)
+        REFERENCES news(id)
+        ON DELETE CASCADE
+
 );
