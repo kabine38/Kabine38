@@ -233,6 +233,10 @@ saveCropButton.addEventListener("click", () => {
 
     editorPreview.src = window.images[window.selectedImage].crop;
 
+    renderGallery();
+
+    selectImage(window.selectedImage);
+
     cropModal.style.display = "none";
 
     cropper.destroy();

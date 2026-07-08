@@ -1,3 +1,8 @@
+<?php
+
+require_once("../config/config.php");
+
+?>
 <!DOCTYPE html>
 <html lang="de">
 

@@ -108,8 +108,8 @@ if (
                 </button>
 
                 <img
-                    src="${event.target.result}"
-                    alt="${file.name}">
+                    src="${window.images[index].crop || event.target.result}"
+                     alt="${file.name}">
 
                 <div class="preview-footer">
                     ${file.name}

@@ -9,7 +9,7 @@
 <script src="../assets/js/news.js"></script>
 <script src="../assets/js/image-manager.js"></script>
 
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js"></script>
+<script src="https://cdn.tiny.cloud/1/<?php echo TINYMCE_API_KEY; ?>/tinymce/7/tinymce.min.js"></script>
 
 <script>
 
