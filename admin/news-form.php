@@ -1,3 +1,14 @@
+<?php
+
+$categoryStmt = $pdo->query("
+    SELECT id, name, slug
+    FROM categories
+    ORDER BY id ASC
+");
+
+$categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
 
 <h1 class="page-title">Neue News erstellen</h1>
 
@@ -302,57 +313,47 @@ Erstelle einen neuen Beitrag für KABINE38.
 
     </section>
 
-    <!-- ===========================
-         KATEGORIEN
-    ============================ -->
+<!-- ===========================
+     KATEGORIEN
+============================ -->
 
-    <div class="form-group">
+<div class="form-group">
 
-        <label>Kategorien</label>
+    <label>Kategorien</label>
 
-        <div class="category-grid">
+    <div class="category-grid">
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="top">
-                <span>🔥 Top News</span>
-            </label>
+      <?php foreach ($categories as $category): ?>
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="herren">
-                <span>⚽ Herren</span>
-            </label>
+        <label class="category-card">
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="damen">
-                <span>👩 Damen</span>
-            </label>
+            <input
+                type="checkbox"
+                name="categories[]"
+                value="<?= (int) $category["id"] ?>">
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="jugend">
-                <span>👦 Jugend</span>
-            </label>
+            <span>
+                <?= htmlspecialchars(
+                    $category["name"],
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>
+            </span>
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="transfer">
-                <span>🔄 Transfers</span>
-            </label>
+        </label>
 
-            <label class="category-card">
-                <input type="checkbox" name="categories[]" value="interview">
-                <span>🎤 Interviews</span>
-            </label>
+    <?php endforeach; ?>
 
-        </div>
 
-        <button
-            type="button"
-            class="add-category-btn">
+</div>
 
-            + Kategorien verwalten
+<a
+    href="categories.php"
+    class="add-category-btn">
 
-        </button>
+    + Kategorien verwalten
 
-    </div>
+</a>
 
  <!-- ===========================
          OPTIONEN

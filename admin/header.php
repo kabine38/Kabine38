@@ -31,7 +31,7 @@ KABINE<span>38</span>
 <nav>
 
 <a href="dashboard.php">Dashboard</a>
-<a href="news.php">News</a>
+<a href="news-list.php">News</a>
 <a href="#">Kategorien</a>
 <a href="#">Benutzer</a>
 <a href="logout.php">Logout</a>

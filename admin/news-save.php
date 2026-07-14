@@ -105,6 +105,35 @@ $stmt->execute([
 $newsId = $pdo->lastInsertId();
 
 /* ==========================================
+   KATEGORIEN SPEICHERN
+========================================== */
+
+if (!empty($_POST["categories"])) {
+
+    $categoryStmt = $pdo->prepare("
+        INSERT INTO news_categories
+        (
+            news_id,
+            category_id
+        )
+        VALUES
+        (
+            :news_id,
+            :category_id
+        )
+    ");
+
+    foreach ($_POST["categories"] as $categoryId) {
+
+        $categoryStmt->execute([
+            "news_id" => $newsId,
+            "category_id" => (int) $categoryId
+        ]);
+
+    }
+}
+
+/* ==========================================
    BILDER SPEICHERN
 ========================================== */
 
@@ -166,21 +195,23 @@ $isHero = !empty($imageData["hero"]) ? 1 : 0;
 
 $stmt = $pdo->prepare("
     INSERT INTO news_images
-    (
-        news_id,
-        image,
-        caption,
-        photographer,
-        is_hero
-    )
-    VALUES
-    (
-        :news,
-        :image,
-        :caption,
-        :photographer,
-        :is_hero
-    )
+(
+    news_id,
+    image,
+    caption,
+    photographer,
+    is_hero,
+    sort_order
+)
+VALUES
+(
+    :news,
+    :image,
+    :caption,
+    :photographer,
+    :is_hero,
+    :sort_order
+)
 ");
 
 $stmt->execute([
@@ -188,7 +219,8 @@ $stmt->execute([
     "image" => $filename,
     "caption" => $caption,
     "photographer" => $photographer,
-    "is_hero" => $isHero
+    "is_hero" => $isHero,
+    "sort_order" => $index
 ]);
     }
 }
