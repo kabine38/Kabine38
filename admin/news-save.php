@@ -1,5 +1,6 @@
 <?php
 
+
 require_once("../app/services/ImageService.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -64,9 +65,8 @@ $newsId = $pdo->lastInsertId();
    BILDER SPEICHERN
 ========================================== */
 
-
-
 $imageService = new ImageService();
+
 
 if (!empty($_FILES["images"]["name"][0])) {
 
@@ -102,15 +102,14 @@ if (!empty($_FILES["images"]["name"][0])) {
         ");
 
         $stmt->execute([
-
             "news" => $newsId,
             "image" => $filename
-
         ]);
-
     }
-
 }
+
+
+
 
 echo "<div class='success-message'>News erfolgreich gespeichert.</div>";
 

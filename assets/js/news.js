@@ -260,7 +260,7 @@ if (
 
         addImages(imageInput.files);
 
-        imageInput.value = "";
+      //  imageInput.value = "";
 
     });
 
@@ -295,6 +295,146 @@ if (
         selectImage(index);
 
     });
+
+/* ==========================================
+   FORMULAR ABSENDEN
+========================================== */
+
+const newsForm = document.getElementById("newsForm");
+
+if (newsForm) {
+
+    newsForm.addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        /* ==========================================
+           FORMULARDATEN
+        ========================================== */
+
+        const formData = new FormData();
+
+        // Titel
+        formData.append(
+            "title",
+            document.getElementById("title").value
+        );
+
+        // Kurzbeschreibung
+        formData.append(
+            "excerpt",
+            document.getElementById("excerpt").value
+        );
+
+        // Artikelinhalt aus TinyMCE
+        const editor = tinymce.get("content");
+
+        formData.append(
+            "content",
+            editor
+                ? editor.getContent()
+                : document.getElementById("content").value
+        );
+
+        /* ==========================================
+           KATEGORIEN
+        ========================================== */
+
+        document
+            .querySelectorAll('input[name="categories[]"]:checked')
+            .forEach((checkbox) => {
+
+                formData.append(
+                    "categories[]",
+                    checkbox.value
+                );
+
+            });
+
+        /* ==========================================
+           OPTIONEN
+        ========================================== */
+
+        const slider = document.querySelector(
+            'input[name="slider"]'
+        );
+
+        const premium = document.querySelector(
+            'input[name="premium"]'
+        );
+
+        const featured = document.querySelector(
+            'input[name="featured"]'
+        );
+
+        if (slider && slider.checked) {
+            formData.append("slider", "1");
+        }
+
+        if (premium && premium.checked) {
+            formData.append("premium", "1");
+        }
+
+        if (featured && featured.checked) {
+            formData.append("featured", "1");
+        }
+
+        /* ==========================================
+           BILDER
+        ========================================== */
+
+        window.images.forEach((image) => {
+
+            formData.append(
+                "images[]",
+                image.file,
+                image.file.name
+            );
+
+        });
+
+        /* ==========================================
+           ABSENDEN
+        ========================================== */
+
+        try {
+
+            const response = await fetch("news.php", {
+
+                method: "POST",
+
+                body: formData
+
+            });
+
+            const html = await response.text();
+
+            if (!response.ok) {
+
+                console.error(html);
+
+                alert("Beim Speichern ist ein Fehler aufgetreten.");
+
+                return;
+
+            }
+
+            document.open();
+            document.write(html);
+            document.close();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Die News konnte nicht gespeichert werden.");
+
+        }
+
+    });
+
+}
+
 
     /* ==========================================
        START
