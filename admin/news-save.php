@@ -13,11 +13,54 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $premium = isset($_POST["premium"]) ? 1 : 0;
     $featured = isset($_POST["featured"]) ? 1 : 0;
 
-    $slug = strtolower($title);
+/* ==========================================
+   SLUG ERSTELLEN
+========================================== */
 
-    $slug = preg_replace("/[^a-z0-9]+/i", "-", $slug);
+$baseSlug = strtolower($title);
 
-    $slug = trim($slug, "-");
+$baseSlug = preg_replace(
+    "/[^a-z0-9]+/i",
+    "-",
+    $baseSlug
+);
+
+$baseSlug = trim($baseSlug, "-");
+
+// Falls aus dem Titel kein gültiger Slug entsteht
+if ($baseSlug === "") {
+    $baseSlug = "news";
+}
+
+$slug = $baseSlug;
+$counter = 2;
+
+
+/* ==========================================
+   PRÜFEN, OB SLUG BEREITS EXISTIERT
+========================================== */
+
+while (true) {
+
+    $slugCheck = $pdo->prepare("
+        SELECT id
+        FROM news
+        WHERE slug = :slug
+        LIMIT 1
+    ");
+
+    $slugCheck->execute([
+        "slug" => $slug
+    ]);
+
+    if (!$slugCheck->fetch()) {
+        break;
+    }
+
+    $slug = $baseSlug . "-" . $counter;
+
+    $counter++;
+}
 
     $stmt = $pdo->prepare("
     INSERT INTO news
@@ -68,6 +111,7 @@ $newsId = $pdo->lastInsertId();
 $imageService = new ImageService();
 
 
+
 if (!empty($_FILES["images"]["name"][0])) {
 
     foreach ($_FILES["images"]["name"] as $index => $name) {
@@ -82,29 +126,70 @@ if (!empty($_FILES["images"]["name"][0])) {
 
         ];
 
-        $filename = $imageService->upload($file);
+        $cropFile = null;
 
+if (
+    isset($_FILES["crops"]["name"][$index]) &&
+    $_FILES["crops"]["error"][$index] === UPLOAD_ERR_OK
+) {
+    $cropFile = [
+        "name" => $_FILES["crops"]["name"][$index],
+        "type" => $_FILES["crops"]["type"][$index],
+        "tmp_name" => $_FILES["crops"]["tmp_name"][$index],
+        "error" => $_FILES["crops"]["error"][$index],
+        "size" => $_FILES["crops"]["size"][$index]
+    ];
+}
+
+$filename = $imageService->upload(
+    $file,
+    $cropFile
+);
         if (!$filename) {
             continue;
         }
 
-        $stmt = $pdo->prepare("
-            INSERT INTO news_images
-            (
-                news_id,
-                image
-            )
-            VALUES
-            (
-                :news,
-                :image
-            )
-        ");
+        /* ==========================================
+   BILDDATEN AUS DEM FORMULAR
+========================================== */
 
-        $stmt->execute([
-            "news" => $newsId,
-            "image" => $filename
-        ]);
+$imageData = $_POST["image_data"][$index] ?? [];
+
+$caption = trim($imageData["caption"] ?? "");
+$photographer = trim($imageData["photographer"] ?? "");
+$isHero = !empty($imageData["hero"]) ? 1 : 0;
+
+
+/* ==========================================
+   BILD IN DATENBANK SPEICHERN
+========================================== */
+
+$stmt = $pdo->prepare("
+    INSERT INTO news_images
+    (
+        news_id,
+        image,
+        caption,
+        photographer,
+        is_hero
+    )
+    VALUES
+    (
+        :news,
+        :image,
+        :caption,
+        :photographer,
+        :is_hero
+    )
+");
+
+$stmt->execute([
+    "news" => $newsId,
+    "image" => $filename,
+    "caption" => $caption,
+    "photographer" => $photographer,
+    "is_hero" => $isHero
+]);
     }
 }
 

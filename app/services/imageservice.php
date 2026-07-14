@@ -131,7 +131,7 @@ private function createThumbnail($source, int $targetWidth = 640, int $targetHei
     return $thumbnail;
 }
 
-public function upload(array $file): ?string
+public function upload(array $file, ?array $cropFile = null): ?string
 {
 
 file_put_contents(
@@ -175,20 +175,50 @@ $this->saveJpeg(
     90
 );
 
-// Thumbnail (640 × 360 px, 16:9)
-$thumbnail = $this->createThumbnail(
-    $master,
-    640,
-    360
-);
+// Thumbnail erzeugen
+// Falls ein manueller Crop vorhanden ist, diesen verwenden.
+// Ansonsten automatischen 16:9-Crop aus dem Master erzeugen.
+
+$thumbnailSource = null;
+
+if (
+    $cropFile !== null &&
+    isset($cropFile["tmp_name"], $cropFile["error"]) &&
+    $cropFile["error"] === UPLOAD_ERR_OK
+) {
+    $thumbnailSource = $this->loadImage(
+        $cropFile["tmp_name"]
+    );
+}
+
+if ($thumbnailSource) {
+
+    // Manueller Crop:
+    // auf 640 × 360 bringen
+    $thumbnail = $this->createThumbnail(
+        $thumbnailSource,
+        640,
+        360
+    );
+
+} else {
+
+    // Kein manueller Crop:
+    // automatischer 16:9-Zuschnitt
+    $thumbnail = $this->createThumbnail(
+        $master,
+        640,
+        360
+    );
+}
 
 $this->saveJpeg(
     $thumbnail,
     $this->thumbnailPath . $filename,
     90
 );
-
-    imagedestroy($source);
+// Speicher freigeben
+imagedestroy($source);
 
 if ($master !== $source) {
     imagedestroy($master);
@@ -198,12 +228,13 @@ if ($medium !== $master) {
     imagedestroy($medium);
 }
 
-if ($thumbnail !== $master) {
-    imagedestroy($thumbnail);
+if ($thumbnailSource) {
+    imagedestroy($thumbnailSource);
 }
 
+imagedestroy($thumbnail);
 
-    return $filename;
+return $filename;
 }
 
  }

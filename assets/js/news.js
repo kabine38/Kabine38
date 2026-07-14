@@ -296,6 +296,31 @@ if (
 
     });
 
+
+function dataURLtoBlob(dataURL) {
+
+    const parts = dataURL.split(",");
+    const mimeMatch = parts[0].match(/:(.*?);/);
+
+    if (!mimeMatch) {
+        return null;
+    }
+
+    const mime = mimeMatch[1];
+    const binary = atob(parts[1]);
+
+    const bytes = new Uint8Array(binary.length);
+
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+
+    return new Blob(
+        [bytes],
+        { type: mime }
+    );
+}
+
 /* ==========================================
    FORMULAR ABSENDEN
 ========================================== */
@@ -383,15 +408,47 @@ if (newsForm) {
            BILDER
         ========================================== */
 
-        window.images.forEach((image) => {
+       window.images.forEach((image, index) => {
 
-            formData.append(
-                "images[]",
-                image.file,
-                image.file.name
-            );
+    // Bilddatei
+    formData.append(
+        "images[]",
+        image.file,
+        image.file.name
+    );
 
-        });
+    // Bildunterschrift
+    formData.append(
+        `image_data[${index}][caption]`,
+        image.caption || ""
+    );
+
+    // Fotograf
+    formData.append(
+        `image_data[${index}][photographer]`,
+        image.photographer || ""
+    );
+
+    // Titelbild
+    formData.append(
+        `image_data[${index}][hero]`,
+        image.hero ? "1" : "0"
+    );
+
+    if (image.crop) {
+
+    const cropBlob = dataURLtoBlob(image.crop);
+
+    formData.append(
+        `crops[${index}]`,
+        cropBlob,
+        `crop-${index}.jpg`
+    );
+
+}
+
+
+});
 
         /* ==========================================
            ABSENDEN
